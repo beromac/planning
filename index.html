@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1e5ea8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Planning">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Planning</title>
+<style id="pageStyle"></style>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f6fa;--card:#fff;--ink:#1c2330;--muted:#6b7686;--line:#dfe4ec;--accent:#1e5ea8;
+  --w:#cdeccf;--wInk:#1b6b2a;--cp:#ffd9b3;--cpInk:#a24b00;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{
+  height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);
+  overscroll-behavior:none;-webkit-user-select:none;user-select:none;
+}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.35;cursor:default}
+
+/* ---------- En-tête ---------- */
+header{
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:calc(6px + env(safe-area-inset-top)) 8px 6px;
+  display:flex;flex-direction:column;gap:6px;flex:none;
+}
+.row1{display:flex;align-items:center;gap:6px}
+.row2{display:flex;align-items:center;gap:4px;min-width:0}
+.row2 .ico{width:38px;height:38px;font-size:18px}
+.row2 .pill{padding:0 9px;font-size:12.5px;white-space:nowrap}
+.row2 .seg button{padding:0 11px}
+@media(max-width:350px){.row2 .ico{width:31px}.row2 .pill{padding:0 6px;font-size:12px}.row2 .seg button{padding:0 8px}}
+.title{
+  flex:1;height:40px;border:0;background:transparent;font-size:20px;font-weight:800;
+  text-align:center;border-radius:12px;
+}
+.title:active{background:#eef2f8}
+.ico{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;font-size:19px;line-height:1;flex:none;
+}
+.ico:active:not(:disabled){background:#eef2f8}
+.pill{height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600}
+.sp{flex:1}
+.seg{display:inline-flex;background:#eef2f8;border-radius:10px;padding:2px}
+.seg button{border:0;background:transparent;height:30px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+/* ---------- Vue mois ---------- */
+#monthView{flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 6px 6px}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;flex:none}
+.dow span{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.dow span:nth-child(n+6){color:#c0504a}
+#grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);gap:3px;touch-action:none}
+.cell{
+  position:relative;background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:2px 3px;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;
+}
+.cell.we{background:#f8f9fc}
+.cell.blank{background:transparent;border-color:transparent}
+.cell.W{background:var(--w);border-color:#9fd3a6}
+.cell.CP{background:var(--cp);border-color:#f0b27a}
+.cell .top{display:flex;justify-content:space-between;align-items:flex-start;line-height:1;flex:none}
+.cell .num{font-size:12px;font-weight:600;color:var(--muted);padding:2px;min-width:20px;text-align:center}
+.cell.today .num{background:var(--accent);color:#fff;border-radius:999px}
+.cell .lab{font-size:15px;font-weight:800;padding-top:1px}
+.cell.W .lab{color:var(--wInk)}
+.cell.CP .lab{color:var(--cpInk)}
+.pas{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;flex:1;min-height:0;overflow:hidden;padding-top:2px}
+.dotp{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:17px;min-width:17px;padding:0 3px;border-radius:999px;
+  font-size:9px;font-weight:800;line-height:1;box-shadow:0 0 0 1.5px #fff;
+}
+.dotp.big{height:32px;min-width:32px;font-size:13px;box-shadow:none;flex:none}
+
+/* ---------- Vue année ---------- */
+#yearView{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:8px}
+.mini{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 6px 8px;cursor:pointer}
+.mtitle{font-weight:800;font-size:13px;margin:0 2px 4px}
+.mdow{display:grid;grid-template-columns:repeat(7,1fr);font-size:9px;color:var(--muted);text-align:center}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;grid-auto-rows:24px}
+.mgrid i{display:block}
+.mc{position:relative;border-radius:4px;background:#f3f5f9;overflow:hidden;min-width:0}
+.mc.W{background:var(--w)}
+.mc.CP{background:var(--cp)}
+.mn{position:absolute;top:1px;left:2px;font-size:9px;color:#556;line-height:1}
+.ml{display:none}
+.md{position:absolute;left:1px;right:1px;bottom:1px;display:flex;flex-wrap:wrap;gap:1px;justify-content:center}
+.dot{display:inline-flex;align-items:center;justify-content:center;width:6px;height:6px;border-radius:50%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:4px 10px 14px;font-size:12px;color:var(--ink);align-items:center}
+.lg{display:inline-flex;align-items:center;gap:5px}
+.lw,.lcp{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:18px;border-radius:5px;font-size:11px}
+.lw{background:var(--w);color:var(--wInk)}
+.lcp{background:var(--cp);color:var(--cpInk)}
+
+/* ---------- Barre d'outils ---------- */
+#tools{
+  flex:none;background:#fff;border-top:1px solid var(--line);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:8px;
+}
+.trow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tool{
+  border:2px solid var(--line);background:#fff;border-radius:12px;padding:6px 0 4px;
+  display:flex;flex-direction:column;align-items:center;line-height:1.1;
+}
+.tool b{font-size:18px}
+.tool small{font-size:10px;color:var(--muted)}
+.tool.on{border-color:var(--accent);background:#e8f1fb}
+.tool[data-tool=W].on{border-color:#2e9e5b;background:var(--w)}
+.tool[data-tool=CP].on{border-color:#e08a2e;background:var(--cp)}
+.srow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:38px}
+.chip{height:36px;min-width:46px;padding:0 10px;border-radius:999px;border:3px solid transparent;font-weight:800;font-size:13px}
+.chip.on{border-color:#111;box-shadow:0 0 0 2px #fff inset}
+.addchip{height:36px;width:46px;border-radius:999px;border:2px dashed #aab4c3;background:#fff;font-size:20px;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+
+
+/* ---------- Synchronisation ---------- */
+#backup{position:relative}
+#backup[data-s]:not([data-s=off])::after{content:"";position:absolute;top:3px;right:3px;width:11px;height:11px;border-radius:50%;border:2px solid #fff;background:#9aa4b2}
+#backup[data-s=ok]::after{background:#2e9e5b}
+#backup[data-s=busy]::after{background:#e0a02e}
+#backup[data-s=err]::after{background:#d33a2f}
+.sstat{font-weight:700;margin:0 0 4px;font-size:15px}
+.sep{border:0;border-top:1px solid var(--line);margin:18px 0 12px}
+.sub{margin:0 0 2px;font-size:14px}
+details.how{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:10px;background:#f8f9fc}
+details.how summary{font-weight:700;font-size:14px;cursor:pointer}
+details.how ol{margin:8px 0 2px;padding-left:20px;font-size:13.5px;line-height:1.5}
+details.how li{margin-bottom:4px}
+details.how a{color:var(--accent);font-weight:700}
+code{background:#eef2f8;border-radius:5px;padding:1px 5px;font-size:12.5px}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed;left:50%;top:calc(110px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-8px);
+  background:#1c2330;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.2s;z-index:50;max-width:90vw;text-align:center;
+}
+#toast.show{opacity:.95;transform:translateX(-50%)}
+
+/* ---------- Boîtes de dialogue ---------- */
+dialog{
+  border:0;border-radius:18px;padding:0;width:min(94vw,460px);max-height:88dvh;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);color:var(--ink);background:#fff;
+  -webkit-user-select:auto;user-select:auto;
+}
+dialog[open]{display:flex;flex-direction:column}
+dialog::backdrop{background:rgba(10,20,40,.45)}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+.dhead h2{margin:0;font-size:18px}
+.dbody{padding:4px 16px 12px;overflow-y:auto;flex:1;min-height:0}
+.dfoot{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px 14px;border-top:1px solid var(--line)}
+.btn{height:42px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:#b3261e;border-color:#f0c4c0}
+.btn.block{width:100%;margin-top:8px}
+label.f{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:10px 0 4px}
+select,input[type=number],input[type=text],input[type=password]{
+  width:100%;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font-size:16px;background:#fff;color:var(--ink);
+}
+.opt{display:flex;gap:10px;align-items:center;padding:10px;border:2px solid var(--line);border-radius:12px;margin-top:8px;font-size:15px;font-weight:600}
+.opt input{width:20px;height:20px;accent-color:var(--accent)}
+.sitem{border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:10px}
+.srow1{display:flex;gap:8px;align-items:center}
+.srow1 .sname{flex:1;min-width:0}
+.srow1 .sini{width:64px;text-align:center;font-weight:800;text-transform:uppercase}
+.del{width:40px;height:40px;border-radius:10px;border:1px solid #f0c4c0;background:#fff;font-size:17px;flex:none}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sw{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #c9d1dc}
+.sw.sel{box-shadow:0 0 0 3px #111}
+.sw:disabled{opacity:.18}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45;margin:8px 0 0}
+
+/* ---------- Impression ---------- */
+#printArea{display:none}
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff;display:block}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pp{display:flex;flex-direction:column;overflow:hidden;color:#111;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;page-break-inside:avoid;break-inside:avoid}
+  .pp.landscape{width:281mm;height:192mm}
+  .pp.portrait{width:194mm;height:279mm}
+  .phead{display:flex;justify-content:space-between;align-items:center;gap:6mm;height:13mm;flex:none}
+  .phead h1{margin:0;font-size:20pt;white-space:nowrap}
+  .pp .legend{padding:0;font-size:8pt;gap:1mm 4mm;justify-content:flex-end}
+  .pp .lw,.pp .lcp{min-width:6mm;height:4.5mm;font-size:7.5pt;border-radius:1mm}
+  .pp .lw{background:#cdeccf}.pp .lcp{background:#ffd9b3}
+  .pp .dotp{height:5.4mm;min-width:5.4mm;font-size:7.5pt;padding:0 1.2mm;box-shadow:none}
+  .pp .legend .dotp{height:4.5mm;min-width:4.5mm;font-size:6.5pt}
+  .pdow{display:grid;grid-template-columns:repeat(7,1fr);gap:1mm;flex:none}
+  .pdow span{text-align:center;font-weight:700;font-size:9pt;background:#e9ecf1;border-radius:1mm;padding:.8mm 0}
+  .pgrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);gap:1mm;margin-top:1mm}
+  .pc{border:.25mm solid #999;border-radius:1.5mm;padding:1mm 1.3mm;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:#fff}
+  .pc.blank{border-color:transparent;background:transparent}
+  .pc.we{background:#f1f1f1}
+  .pc.W{background:#cdeccf;border-color:#5fae6b}
+  .pc.CP{background:#ffd9b3;border-color:#d98b3f}
+  .ptop{display:flex;justify-content:space-between;line-height:1;flex:none}
+  .pn{font-size:10pt;font-weight:700}
+  .pl{font-size:13pt;font-weight:800}
+  .pc.W .pl{color:#1b6b2a}.pc.CP .pl{color:#a24b00}
+  .ppas{display:flex;flex-wrap:wrap;gap:.8mm;align-content:flex-start;margin-top:1mm}
+  .pyear{flex:1;min-height:0;display:grid;gap:3mm;margin-top:2mm}
+  .landscape .pyear{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr)}
+  .portrait .pyear{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr)}
+  .pp .mini{display:flex;flex-direction:column;min-height:0;min-width:0;background:none;border:0;padding:0;border-radius:0}
+  .pp .mtitle{font-size:9pt;text-transform:uppercase;margin:0 0 .6mm}
+  .pp .mdow{font-size:6pt}
+  .pp .mgrid{flex:1;min-height:0;gap:.4mm;grid-auto-rows:auto}
+  .pp .mc{border:.2mm solid #bbb;border-radius:.8mm;background:#fff}
+  .pp .mc.we{background:#f1f1f1}
+  .pp .mc.W{background:#cdeccf;border-color:#5fae6b}
+  .pp .mc.CP{background:#ffd9b3;border-color:#d98b3f}
+  .pp .mn{top:.3mm;left:.5mm;font-size:6.5pt;font-weight:700;color:#111}
+  .pp .ml{display:block;position:absolute;top:.3mm;right:.5mm;font-size:5.5pt;font-weight:800}
+  .pp .md{left:.4mm;right:.4mm;bottom:.4mm;gap:.3mm;justify-content:flex-start}
+  .pp .dot{width:auto;height:3.4mm;min-width:3.4mm;border-radius:99mm;font-size:4.5pt;font-weight:800;padding:0 .4mm}
+}
+</style>
+</head>
+<body>
+<noscript>Cette application nécessite JavaScript.</noscript>
+
+<header>
+  <div class="row1">
+    <button class="ico" id="prev" aria-label="Précédent">‹</button>
+    <button class="title" id="title">Planning</button>
+    <button class="ico" id="next" aria-label="Suivant">›</button>
+  </div>
+  <div class="row2">
+    <div class="seg">
+      <button data-view="month" class="on">Mois</button>
+      <button data-view="year">Année</button>
+    </div>
+    <button class="pill" id="today">Aujourd'hui</button>
+    <span class="sp"></span>
+    <button class="ico" id="undo" aria-label="Annuler" title="Annuler">↶</button>
+    <button class="ico" id="print" aria-label="Imprimer" title="Imprimer">🖨</button>
+    <button class="ico" id="backup" aria-label="Synchronisation et sauvegarde" title="Synchronisation et sauvegarde" data-s="off">☁</button>
+  </div>
+</header>
+
+<section id="monthView">
+  <div class="dow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+  <div id="grid"></div>
+</section>
+<section id="yearView" hidden></section>
+
+<div id="tools"></div>
+<div id="toast" role="status"></div>
+
+<!-- Aller à -->
+<dialog id="gotoDlg">
+  <div class="dhead"><h2>Aller à…</h2></div>
+  <div class="dbody">
+    <label class="f" for="gMonth">Mois</label>
+    <select id="gMonth"></select>
+    <label class="f" for="gYear">Année</label>
+    <input type="number" id="gYear" inputmode="numeric" min="1900" max="2200">
+  </div>
+  <div class="dfoot">
+    <button class="btn" data-close>Annuler</button>
+    <button class="btn primary" id="gGo">Afficher</button>
+  </div>
+</dialog>
+
+<!-- Magasins -->
+<dialog id="storesDlg">
+  <div class="dhead"><h2>Magasins <span id="storeCount" style="color:var(--muted);font-weight:600;font-size:14px"></span></h2></div>
+  <div class="dbody">
+    <p class="note" style="margin-top:0">Jusqu'à 10 magasins, chacun avec sa couleur et ses initiales (3 lettres maximum).</p>
+    <div id="storeList"></div>
+    <button class="btn block" id="addStore">+ Ajouter un magasin</button>
+  </div>
+  <div class="dfoot"><button class="btn primary" data-close>Terminé</button></div>
+</dialog>
+
+<!-- Impression -->
+<dialog id="printDlg">
+  <div class="dhead"><h2>Imprimer (1 page A4)</h2></div>
+  <div class="dbody">
+    <label class="opt"><input type="radio" name="pType" value="month" checked> Un mois</label>
+    <label class="opt"><input type="radio" name="pType" value="year"> Une année complète</label>
+    <div id="pMonthWrap">
+      <label class="f" for="pMonth">Mois</label>
+      <select id="pMonth"></select>
+    </div>
+    <label class="f" for="pYear">Année</label>
+    <input type="number" id="pYear" inputmode="numeric" min="1900" max="2200">
+    <label class="f" for="pOrient">Orientation</label>
+    <select id="pOrient">
+      <option value="landscape">Paysage (recommandé)</option>
+      <option value="portrait">Portrait</option>
+    </select>
+    <p class="note">Dans la fenêtre d'impression, choisissez le format A4 et « Enregistrer en PDF » si vous n'avez pas d'imprimante.</p>
+  </div>
+  <div class="dfoot">
+    <button class="btn" data-close>Annuler</button>
+    <button class="btn primary" id="doPrint">Imprimer</button>
+  </div>
+</dialog>
+
+<!-- Synchronisation & sauvegarde -->
+<dialog id="backupDlg">
+  <div class="dhead"><h2>Synchronisation</h2></div>
+  <div class="dbody">
+    <div id="syncOffBox">
+      <p class="note" style="margin-top:0">Reliez votre téléphone et votre ordinateur : ce que vous saisissez sur l'un apparaît automatiquement sur l'autre. Les données sont stockées dans un « gist » privé de votre compte GitHub.</p>
+      <details class="how" open>
+        <summary>Comment faire (2 minutes)</summary>
+        <ol>
+          <li>Ouvrez <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Planning" target="_blank" rel="noopener">la page de création du jeton GitHub</a> (connectez-vous si besoin).</li>
+          <li>À « Expiration », choisissez <b>No expiration</b>. Seule la case <b>gist</b> doit être cochée.</li>
+          <li>Tout en bas, touchez <b>Generate token</b>, puis copiez le jeton affiché (il commence par <code>ghp_</code>).</li>
+          <li>Collez-le ci-dessous et touchez « Activer ».</li>
+          <li>Sur l'autre appareil, faites la même chose avec <b>le même jeton</b>.</li>
+        </ol>
+      </details>
+      <label class="f" for="syncToken">Jeton GitHub</label>
+      <input type="password" id="syncToken" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_…">
+      <button class="btn primary block" id="syncEnable">Activer la synchronisation</button>
+    </div>
+    <div id="syncOnBox" hidden>
+      <p id="syncStatus" class="sstat">…</p>
+      <button class="btn block" id="syncNow">↻ Synchroniser maintenant</button>
+      <button class="btn block" id="syncCopy">Copier le jeton (pour l'autre appareil)</button>
+      <button class="btn block danger" id="syncOff">Arrêter sur cet appareil</button>
+      <p class="note">Les modifications sont envoyées quelques secondes après la saisie, et récupérées à chaque ouverture de l'application. Sans réseau, tout reste enregistré sur l'appareil et part dès le retour de la connexion.</p>
+    </div>
+    <hr class="sep">
+    <h3 class="sub">Sauvegarde (fichier)</h3>
+    <button class="btn block" id="btnExport">⬇ Enregistrer une sauvegarde</button>
+    <button class="btn block" id="btnImport">⬆ Restaurer une sauvegarde</button>
+    <input type="file" id="fileImport" accept="application/json,.json" hidden>
+    <button class="btn block danger" id="btnReset">Tout effacer</button>
+  </div>
+  <div class="dfoot"><button class="btn primary" data-close>Fermer</button></div>
+</dialog>
+
+<div id="printArea"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Constantes & utilitaires ================= */
+const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DOW = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const DOW1 = ['L','M','M','J','V','S','D'];
+const PALETTE = ['#E53935','#1E88E5','#8E24AA','#FB8C00','#00897B','#D81B60','#6D4C41','#FDD835','#3949AB','#43A047'];
+const MAXSTORES = 10;
+const LS = 'planning-v1';
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const key = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+function ink(hex) {
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#111' : '#fff';
+}
+function autoIni(name) {
+  const w = name.trim().split(/[\s\-']+/).filter(Boolean);
+  if (!w.length) return '';
+  if (w.length === 1) return w[0].slice(0, 2).toUpperCase();
+  return w.slice(0, 3).map((x) => x[0]).join('').toUpperCase();
+}
+function monthInfo(y, m) {
+  const off = (new Date(y, m, 1).getDay() + 6) % 7;   // lundi = 0
+  const n = new Date(y, m + 1, 0).getDate();
+  return { off, n, rows: Math.ceil((off + n) / 7) };
+}
+
+/* ================= État & stockage ================= */
+// Chaque jour porte un horaire de modification "u" (sert à fusionner les appareils).
+// Un jour vidé reste en mémoire comme "pierre tombale" {t:null,s:[],u} pour que l'effacement se propage.
+function emptyState() { return { stores: [], storesU: 0, days: {}, tool: 'W' }; }
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS));
+    if (s && typeof s.days === 'object' && Array.isArray(s.stores)) {
+      const st = Object.assign(emptyState(), s);
+      for (const k of Object.keys(st.days)) if (!(st.days[k].u > 0)) st.days[k].u = 1;
+      if (!(st.storesU > 0)) st.storesU = st.stores.length ? Date.now() : 0;
+      return st;
+    }
+  } catch (e) {}
+  return emptyState();
+}
+let state = load();
+function save(sync = true) {
+  try { localStorage.setItem(LS, JSON.stringify(state)); }
+  catch (e) { toast('Sauvegarde impossible (stockage bloqué ou plein)'); }
+  if (sync) scheduleSync();
+}
+// Annulation : remet les jours dans l'état du cliché, avec un nouvel horaire pour ceux qui changent.
+function restoreDays(snap) {
+  const old = JSON.parse(snap), now = Date.now(), out = {};
+  const sig = (r) => (r ? (r.t || '') + '|' + (r.s || []).join(',') : '|');
+  for (const k of new Set([...Object.keys(old), ...Object.keys(state.days)])) {
+    const cur = state.days[k], o = old[k];
+    if (sig(cur) === sig(o)) { if (cur) out[k] = cur; }
+    else out[k] = { t: o ? o.t : null, s: o ? o.s.slice() : [], u: now };
+  }
+  state.days = out;
+}
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+
+const now0 = new Date();
+const ui = { y: now0.getFullYear(), m: now0.getMonth(), view: 'month' };
+const storeById = (id) => state.stores.find((s) => s.id === id);
+const storesOf = (rec) => state.stores.filter((s) => (rec.s || []).includes(s.id));
+
+let undoStack = [];
+function pushUndo(snap) { undoStack.push(snap); if (undoStack.length > 50) undoStack.shift(); updUndo(); }
+function updUndo() { $('#undo').disabled = !undoStack.length; }
+
+let tt;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ================= Vue mois ================= */
+const grid = $('#grid'), monthView = $('#monthView'), yearView = $('#yearView'), tools = $('#tools');
+
+function cellInner(k, d) {
+  const rec = state.days[k] || {};
+  const pas = storesOf(rec).map((s) =>
+    `<span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>`).join('');
+  return `<div class="top"><span class="num">${d}</span><span class="lab">${rec.t || ''}</span></div><div class="pas">${pas}</div>`;
+}
+function renderMonth() {
+  const { off, n, rows } = monthInfo(ui.y, ui.m);
+  const t = new Date();
+  let h = '';
+  for (let i = 0; i < rows * 7; i++) {
+    const d = i - off + 1;
+    if (d < 1 || d > n) { h += '<div class="cell blank"></div>'; continue; }
+    const k = key(ui.y, ui.m, d);
+    const rec = state.days[k];
+    const isT = ui.y === t.getFullYear() && ui.m === t.getMonth() && d === t.getDate();
+    h += `<div class="cell${rec && rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}${isT ? ' today' : ''}" data-k="${k}" data-d="${d}">${cellInner(k, d)}</div>`;
+  }
+  grid.style.gridTemplateRows = `repeat(${rows},1fr)`;
+  grid.innerHTML = h;
+}
+function updateCell(el) {
+  const k = el.dataset.k, rec = state.days[k];
+  el.classList.remove('W', 'CP');
+  if (rec && rec.t) el.classList.add(rec.t);
+  el.innerHTML = cellInner(k, el.dataset.d);
+}
+
+/* ---------- Geste au doigt (toucher / glisser pour peindre) ---------- */
+let g = null;
+function applyToCell(el, first) {
+  const k = el.dataset.k;
+  if (g.touched.has(k)) return;
+  g.touched.add(k);
+  const existed = !!state.days[k];
+  const rec = state.days[k] || (state.days[k] = { t: null, s: [], u: 0 });
+  if (!Array.isArray(rec.s)) rec.s = [];
+  const before = rec.t + '|' + rec.s.join(',');
+  const tool = state.tool;
+  if (first) {
+    if (tool === 'W' || tool === 'CP') g.action = rec.t === tool ? 'remove' : 'set';
+    else if (tool === 'ERASE') g.action = 'erase';
+    else g.action = rec.s.includes(tool) ? 'remove' : 'add';
+  }
+  if (tool === 'W' || tool === 'CP') {
+    if (g.action === 'set') {
+      if (tool === 'CP' && rec.s.length) { rec.s = []; g.cleared = true; }
+      rec.t = tool;
+    } else if (rec.t === tool) {
+      rec.t = null;
+      if (rec.s.length) { rec.s = []; g.cleared = true; }
+    }
+  } else if (tool === 'ERASE') {
+    rec.t = null; rec.s = [];
+  } else {
+    const has = rec.s.includes(tool);
+    if (g.action === 'add') {
+      if (rec.t !== 'W') g.blocked++;
+      else if (!has) rec.s.push(tool);
+    } else if (has) {
+      rec.s = rec.s.filter((x) => x !== tool);
+    }
+  }
+  if (rec.t + '|' + rec.s.join(',') !== before) rec.u = Date.now();
+  else if (!existed) delete state.days[k];
+  updateCell(el);
+}
+function endGesture() {
+  if (!g) return;
+  const snap = g.snap;
+  if (JSON.stringify(state.days) !== snap) { pushUndo(snap); save(); }
+  if (g.blocked) toast('Une pastille se pose uniquement sur un jour W');
+  else if (g.cleared) toast('Réservations retirées de ce(s) jour(s)');
+  g = null;
+}
+grid.addEventListener('pointerdown', (e) => {
+  const c = e.target.closest('.cell[data-k]');
+  if (!c) return;
+  e.preventDefault();
+  g = { snap: JSON.stringify(state.days), touched: new Set(), action: null, blocked: 0, cleared: false };
+  try { grid.setPointerCapture(e.pointerId); } catch (_) {}
+  applyToCell(c, true);
+});
+grid.addEventListener('pointermove', (e) => {
+  if (!g) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const c = el && el.closest && el.closest('.cell[data-k]');
+  if (c) applyToCell(c, false);
+});
+grid.addEventListener('pointerup', endGesture);
+grid.addEventListener('pointercancel', endGesture);
+grid.addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* ================= Vue année ================= */
+function miniMonth(y, m, print) {
+  const { off, n, rows } = monthInfo(y, m);
+  let c = '';
+  for (let i = 0; i < rows * 7; i++) {
+    const d = i - off + 1;
+    if (d < 1 || d > n) { c += '<i></i>'; continue; }
+    const rec = state.days[key(y, m, d)] || {};
+    const dots = storesOf(rec).map((s) =>
+      `<span class="dot" style="background:${s.color};color:${ink(s.color)}">${print ? esc(s.ini.slice(0, 2)) : ''}</span>`).join('');
+    c += `<div class="mc${rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}"><span class="mn">${d}</span>${rec.t ? `<span class="ml">${rec.t}</span>` : ''}<span class="md">${dots}</span></div>`;
+  }
+  return `<div class="mini" data-m="${m}"><div class="mtitle">${MONTHS[m]}</div>` +
+    `<div class="mdow">${DOW1.map((x) => `<span>${x}</span>`).join('')}</div>` +
+    `<div class="mgrid"${print ? ` style="grid-template-rows:repeat(${rows},1fr)"` : ''}>${c}</div></div>`;
+}
+function legendHTML() {
+  const items = state.stores.map((s) =>
+    `<span class="lg"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>${esc(s.name)}</span>`);
+  return `<div class="legend"><span class="lg"><b class="lw">W</b> Disponible</span><span class="lg"><b class="lcp">CP</b> Congés</span>${items.join('')}</div>`;
+}
+function renderYear() {
+  let h = '';
+  for (let m = 0; m < 12; m++) h += miniMonth(ui.y, m, false);
+  yearView.innerHTML = `<div class="ygrid">${h}</div>${legendHTML()}`;
+}
+yearView.addEventListener('click', (e) => {
+  const mi = e.target.closest('.mini');
+  if (!mi) return;
+  ui.m = +mi.dataset.m; ui.view = 'month'; render();
+});
+
+/* ================= Barre d'outils ================= */
+function renderTools() {
+  const t = state.tool;
+  const chips = state.stores.map((s) =>
+    `<button class="chip${t === s.id ? ' on' : ''}" data-tool="${s.id}" style="background:${s.color};color:${ink(s.color)}" title="${esc(s.name)}">${esc(s.ini)}</button>`).join('');
+  const add = state.stores.length < MAXSTORES ? '<button class="addchip" data-stores aria-label="Ajouter un magasin">+</button>' : '';
+  const hint = state.stores.length ? '' : '<p class="hint">Ajoutez vos magasins (bouton +) pour poser des pastilles sur vos jours W.</p>';
+  tools.innerHTML = `
+    <div class="trow">
+      <button class="tool${t === 'W' ? ' on' : ''}" data-tool="W"><b>W</b><small>Dispo</small></button>
+      <button class="tool${t === 'CP' ? ' on' : ''}" data-tool="CP"><b>CP</b><small>Congés</small></button>
+      <button class="tool${t === 'ERASE' ? ' on' : ''}" data-tool="ERASE"><b>⌫</b><small>Gomme</small></button>
+      <button class="tool" data-stores><b>⚙</b><small>Magasins</small></button>
+    </div>
+    <div class="srow">${chips}${add}${hint}</div>`;
+}
+tools.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tool]');
+  if (b) { state.tool = b.dataset.tool; save(false); renderTools(); return; }
+  if (e.target.closest('[data-stores]')) openStores();
+});
+
+/* ================= Rendu global & navigation ================= */
+function render() {
+  $('#title').textContent = (ui.view === 'month' ? `${MONTHS[ui.m]} ${ui.y}` : String(ui.y)) + ' ▾';
+  monthView.hidden = ui.view !== 'month';
+  yearView.hidden = ui.view !== 'year';
+  tools.hidden = ui.view !== 'month';
+  document.querySelectorAll('.seg button').forEach((b) => b.classList.toggle('on', b.dataset.view === ui.view));
+  if (ui.view === 'month') renderMonth(); else renderYear();
+  renderTools();
+  updUndo();
+}
+function lightRender() {
+  if (ui.view === 'month') renderMonth(); else renderYear();
+  renderTools();
+}
+function shift(dir) {
+  if (ui.view === 'month') {
+    ui.m += dir;
+    if (ui.m < 0) { ui.m = 11; ui.y--; }
+    if (ui.m > 11) { ui.m = 0; ui.y++; }
+  } else ui.y += dir;
+  render();
+}
+$('#prev').onclick = () => shift(-1);
+$('#next').onclick = () => shift(1);
+$('#today').onclick = () => { const t = new Date(); ui.y = t.getFullYear(); ui.m = t.getMonth(); ui.view = 'month'; render(); };
+document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { ui.view = b.dataset.view; render(); });
+$('#undo').onclick = () => {
+  const s = undoStack.pop();
+  if (s == null) return;
+  restoreDays(s); save(); render(); toast('Action annulée');
+};
+
+/* ---------- Dialogues : génériques ---------- */
+document.querySelectorAll('dialog').forEach((d) => {
+  d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
+});
+const monthOptions = MONTHS.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+$('#gMonth').innerHTML = monthOptions;
+$('#pMonth').innerHTML = monthOptions;
+const clampYear = (v) => Math.min(2200, Math.max(1900, parseInt(v, 10) || new Date().getFullYear()));
+
+/* ---------- Aller à ---------- */
+$('#title').onclick = () => {
+  $('#gMonth').value = ui.m; $('#gYear').value = ui.y;
+  $('#gotoDlg').showModal();
+};
+$('#gGo').onclick = () => {
+  ui.y = clampYear($('#gYear').value);
+  if (ui.view === 'month') ui.m = +$('#gMonth').value;
+  $('#gotoDlg').close(); render();
+};
+
+/* ---------- Magasins ---------- */
+const storesDlg = $('#storesDlg');
+function renderStoresDlg() {
+  const used = new Set(state.stores.map((s) => s.color));
+  $('#storeList').innerHTML = state.stores.map((s) => `
+    <div class="sitem" data-id="${s.id}">
+      <div class="srow1">
+        <span class="dotp big" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>
+        <input type="text" class="sname" value="${esc(s.name)}" placeholder="Nom du magasin" maxlength="30" aria-label="Nom">
+        <input type="text" class="sini" value="${esc(s.ini)}" placeholder="AB" maxlength="3" aria-label="Initiales" autocapitalize="characters">
+        <button class="del" aria-label="Supprimer">🗑</button>
+      </div>
+      <div class="swatches">${PALETTE.map((c) =>
+        `<button class="sw${c === s.color ? ' sel' : ''}" data-c="${c}" style="background:${c}" aria-label="Couleur"${used.has(c) && c !== s.color ? ' disabled' : ''}></button>`).join('')}</div>
+    </div>`).join('') || '<p class="note">Aucun magasin pour le moment.</p>';
+  $('#addStore').disabled = state.stores.length >= MAXSTORES;
+  $('#storeCount').textContent = `${state.stores.length}/${MAXSTORES}`;
+}
+function openStores() { renderStoresDlg(); storesDlg.showModal(); }
+storesDlg.addEventListener('close', () => { save(); lightRender(); });
+
+$('#storeList').addEventListener('input', (e) => {
+  const item = e.target.closest('.sitem'); if (!item) return;
+  const s = storeById(item.dataset.id); if (!s) return;
+  if (e.target.classList.contains('sname')) {
+    const prevAuto = autoIni(s.name);
+    s.name = e.target.value;
+    if (!s.ini || s.ini === prevAuto) {
+      s.ini = autoIni(s.name);
+      item.querySelector('.sini').value = s.ini;
+    }
+  } else if (e.target.classList.contains('sini')) {
+    s.ini = e.target.value.toUpperCase().slice(0, 3);
+    e.target.value = s.ini;
+  } else return;
+  const big = item.querySelector('.dotp.big'); big.textContent = s.ini;
+  state.storesU = Date.now();
+  save();
+});
+$('#storeList').addEventListener('click', (e) => {
+  const item = e.target.closest('.sitem'); if (!item) return;
+  const s = storeById(item.dataset.id); if (!s) return;
+  const sw = e.target.closest('.sw');
+  if (sw && !sw.disabled) { s.color = sw.dataset.c; state.storesU = Date.now(); save(); renderStoresDlg(); return; }
+  if (e.target.closest('.del')) {
+    if (!confirm(`Supprimer « ${s.name || s.ini} » et toutes ses pastilles du planning ?`)) return;
+    pushUndo(JSON.stringify(state.days));
+    const now = Date.now();
+    state.stores = state.stores.filter((x) => x.id !== s.id);
+    state.storesU = now;
+    for (const k of Object.keys(state.days)) {
+      const r = state.days[k];
+      if ((r.s || []).includes(s.id)) { r.s = r.s.filter((id) => id !== s.id); r.u = now; }
+    }
+    if (state.tool === s.id) state.tool = 'W';
+    save(); renderStoresDlg();
+  }
+});
+$('#addStore').onclick = () => {
+  if (state.stores.length >= MAXSTORES) return;
+  const used = new Set(state.stores.map((s) => s.color));
+  const color = PALETTE.find((c) => !used.has(c)) || PALETTE[0];
+  const n = state.stores.length + 1;
+  const s = { id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: 'Magasin ' + n, ini: 'M' + n, color };
+  state.stores.push(s); save(); renderStoresDlg();
+  const list = $('#storeList'); list.lastElementChild.scrollIntoView({ block: 'nearest' });
+  const inp = list.lastElementChild.querySelector('.sname'); inp.focus(); inp.select();
+};
+
+/* ---------- Impression (1 page A4) ---------- */
+function buildPrintMonth(y, m, orient) {
+  const { off, n, rows } = monthInfo(y, m);
+  let cells = '';
+  for (let i = 0; i < rows * 7; i++) {
+    const d = i - off + 1;
+    if (d < 1 || d > n) { cells += '<div class="pc blank"></div>'; continue; }
+    const rec = state.days[key(y, m, d)] || {};
+    const dots = storesOf(rec).map((s) =>
+      `<span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>`).join('');
+    cells += `<div class="pc${rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}"><div class="ptop"><span class="pn">${d}</span><span class="pl">${rec.t || ''}</span></div><div class="ppas">${dots}</div></div>`;
+  }
+  return `<div class="pp ${orient}"><div class="phead"><h1>${MONTHS[m]} ${y}</h1>${legendHTML()}</div>` +
+    `<div class="pdow">${DOW.map((x) => `<span>${x}</span>`).join('')}</div>` +
+    `<div class="pgrid" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div></div>`;
+}
+function buildPrintYear(y, orient) {
+  let h = '';
+  for (let m = 0; m < 12; m++) h += miniMonth(y, m, true);
+  return `<div class="pp ${orient}"><div class="phead"><h1>Année ${y}</h1>${legendHTML()}</div><div class="pyear">${h}</div></div>`;
+}
+const pType = () => document.querySelector('input[name=pType]:checked').value;
+function syncPrintDlg() { $('#pMonthWrap').hidden = pType() !== 'month'; }
+document.querySelectorAll('input[name=pType]').forEach((r) => r.onchange = syncPrintDlg);
+$('#print').onclick = () => {
+  document.querySelector(`input[name=pType][value=${ui.view}]`).checked = true;
+  $('#pMonth').value = ui.m; $('#pYear').value = ui.y;
+  syncPrintDlg(); $('#printDlg').showModal();
+};
+$('#doPrint').onclick = () => {
+  const orient = $('#pOrient').value, y = clampYear($('#pYear').value);
+  $('#pageStyle').textContent = `@page{size:A4 ${orient};margin:8mm}`;
+  $('#printArea').innerHTML = pType() === 'month' ? buildPrintMonth(y, +$('#pMonth').value, orient) : buildPrintYear(y, orient);
+  $('#printDlg').close();
+  setTimeout(() => window.print(), 250);
+};
+window.addEventListener('afterprint', () => { $('#printArea').innerHTML = ''; });
+
+/* ---------- Sauvegarde / restauration ---------- */
+$('#backup').onclick = () => $('#backupDlg').showModal();
+$('#btnExport').onclick = () => {
+  const t = new Date();
+  const blob = new Blob([payload()], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `planning-${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+};
+$('#btnImport').onclick = () => $('#fileImport').click();
+$('#fileImport').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const c = sanitize(JSON.parse(await f.text()));
+    if (!confirm('Remplacer le planning actuel par cette sauvegarde ?')) { e.target.value = ''; return; }
+    const now = Date.now(), days = {};
+    for (const k of Object.keys(state.days)) days[k] = { t: null, s: [], u: now };
+    for (const k of Object.keys(c.days)) days[k] = { t: c.days[k].t, s: c.days[k].s, u: now };
+    state.stores = c.stores; state.storesU = now; state.days = days; state.tool = 'W';
+    undoStack = []; save(); render(); $('#backupDlg').close(); toast('Sauvegarde restaurée');
+  } catch (err) { toast('Fichier de sauvegarde invalide'); }
+  e.target.value = '';
+};
+$('#btnReset').onclick = () => {
+  const msg = syncCfg ? 'Effacer TOUT le planning et les magasins, sur tous vos appareils reliés ? Cette action est définitive.'
+                      : 'Effacer TOUT le planning et les magasins ? Cette action est définitive.';
+  if (!confirm(msg)) return;
+  if (!confirm('Vraiment tout effacer ?')) return;
+  const now = Date.now();
+  for (const k of Object.keys(state.days)) state.days[k] = { t: null, s: [], u: now };
+  state.stores = []; state.storesU = now; state.tool = 'W';
+  undoStack = []; save(); render(); $('#backupDlg').close(); toast('Planning effacé');
+};
+
+/* ================= Synchronisation entre appareils (gist GitHub privé) ================= */
+const SYNC_LS = 'planning-sync-v1';
+const GIST_FILE = 'planning.json';
+let syncCfg = null;
+try { const c = JSON.parse(localStorage.getItem(SYNC_LS)); if (c && typeof c.token === 'string' && c.token) syncCfg = c; } catch (e) {}
+const syncSt = { s: syncCfg ? 'busy' : 'off', msg: '', at: 0 };
+let syncing = false, syncAgain = false, syncTimer = null, syncBlocked = false, dirty = false;
+
+function persistCfg() {
+  try { if (syncCfg) localStorage.setItem(SYNC_LS, JSON.stringify(syncCfg)); else localStorage.removeItem(SYNC_LS); } catch (e) {}
+}
+function payload() {
+  return JSON.stringify({ app: 'planning', v: 2, storesU: state.storesU, stores: state.stores, days: state.days });
+}
+// Vérifie et nettoie des données venant d'un fichier ou de GitHub.
+function sanitize(j) {
+  if (!j || typeof j.days !== 'object' || !Array.isArray(j.stores)) throw new Error('format');
+  const stores = j.stores.slice(0, MAXSTORES).map((s, i) => ({
+    id: String(s.id || 's' + i).slice(0, 40), name: String(s.name || '').slice(0, 30),
+    ini: String(s.ini || '').toUpperCase().slice(0, 3),
+    color: PALETTE.includes(s.color) ? s.color : PALETTE[i % PALETTE.length],
+  }));
+  const days = {};
+  for (const k of Object.keys(j.days)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+    const r = j.days[k] || {};
+    const t = r.t === 'W' || r.t === 'CP' ? r.t : null;
+    const s = t === 'W' && Array.isArray(r.s) ? r.s.filter((id) => stores.some((x) => x.id === id)) : [];
+    days[k] = { t, s, u: Number.isFinite(r.u) ? r.u : 0 };
+  }
+  return { stores, storesU: Number.isFinite(j.storesU) ? j.storesU : 0, days };
+}
+// Fusionne les données de GitHub dans l'état local : pour chaque jour, la modification la plus récente gagne.
+function mergeRemote(rem) {
+  let changed = false, push = false, daysChanged = false;
+  if (rem.storesU > state.storesU) { state.stores = rem.stores; state.storesU = rem.storesU; changed = true; }
+  else if (state.storesU > rem.storesU) push = true;
+  for (const k of Object.keys(rem.days)) {
+    const l = state.days[k], r = rem.days[k];
+    if (!l || r.u > l.u) { state.days[k] = r; changed = true; daysChanged = true; }
+    else if (l.u > r.u) push = true;
+  }
+  for (const k of Object.keys(state.days)) if (!rem.days[k]) push = true;
+  if (state.tool !== 'W' && state.tool !== 'CP' && state.tool !== 'ERASE' && !storeById(state.tool)) state.tool = 'W';
+  return { changed, push, daysChanged };
+}
+
+class SyncErr extends Error { constructor(m, fatal) { super(m); this.fatal = !!fatal; } }
+async function gh(path, token, opts = {}) {
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+  let r;
+  try {
+    r = await fetch('https://api.github.com' + path, Object.assign({ cache: 'no-store', signal: ctl.signal }, opts, {
+      headers: Object.assign({ Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token },
+        opts.body ? { 'Content-Type': 'application/json' } : {}),
+    }));
+  } catch (e) {
+    throw new SyncErr(navigator.onLine === false ? 'Hors connexion : sera réessayé' : 'GitHub injoignable : sera réessayé');
+  } finally { clearTimeout(to); }
+  if (r.status === 401) throw new SyncErr('Jeton refusé (invalide ou expiré)', true);
+  if (r.status === 403 || r.status === 429) throw new SyncErr('Limite GitHub atteinte : nouvel essai plus tard');
+  if (r.status !== 404 && !r.ok) throw new SyncErr('Erreur GitHub (' + r.status + ')');
+  return r;
+}
+async function findGist(token) {
+  for (let p = 1; p <= 3; p++) {
+    const r = await gh(`/gists?per_page=100&page=${p}`, token);
+    if (r.status === 404) throw new SyncErr('Ce jeton n’a pas l’autorisation « gist »', true);
+    const list = await r.json();
+    const hit = list.find((x) => x.files && x.files[GIST_FILE]);
+    if (hit) return hit.id;
+    if (list.length < 100) break;
+  }
+  return null;
+}
+async function createGist(token) {
+  const r = await gh('/gists', token, { method: 'POST', body: JSON.stringify({
+    description: 'Planning (synchronisation automatique)', public: false, files: { [GIST_FILE]: { content: payload() } } }) });
+  if (r.status === 404) throw new SyncErr('Ce jeton n’a pas l’autorisation « gist »', true);
+  return (await r.json()).id;
+}
+// Renvoie les données nettoyées, null si le fichier est vide, 'gone' si le gist n'existe plus.
+async function readGist(id, token) {
+  const r = await gh('/gists/' + id, token);
+  if (r.status === 404) return 'gone';
+  const j = await r.json();
+  const f = j.files && j.files[GIST_FILE];
+  if (!f) return null;
+  let text = f.content;
+  if (f.truncated && f.raw_url) {
+    try { text = await (await fetch(f.raw_url, { cache: 'no-store' })).text(); }
+    catch (e) { throw new SyncErr('GitHub injoignable : sera réessayé'); }
+  }
+  try { return sanitize(JSON.parse(text)); } catch (e) { return null; }
+}
+async function writeGist(id, token) {
+  const r = await gh('/gists/' + id, token, { method: 'PATCH', body: JSON.stringify({ files: { [GIST_FILE]: { content: payload() } } }) });
+  return r.status === 404 ? 'gone' : 'ok';
+}
+
+function setSync(s, msg) {
+  syncSt.s = s; syncSt.msg = msg || '';
+  if (s === 'ok') syncSt.at = Date.now();
+  drawSync();
+}
+function drawSync() {
+  $('#backup').dataset.s = syncCfg ? syncSt.s : 'off';
+  $('#syncOffBox').hidden = !!syncCfg;
+  $('#syncOnBox').hidden = !syncCfg;
+  if (!syncCfg) return;
+  const hh = syncSt.at ? new Date(syncSt.at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+  $('#syncStatus').textContent = syncSt.s === 'busy' ? '⏳ Synchronisation…'
+    : syncSt.s === 'ok' ? `✔ Synchronisé à ${hh}`
+    : `⚠ ${syncSt.msg || 'Erreur de synchronisation'}`;
+}
+function scheduleSync(delay = 1000) {
+  if (!syncCfg) return;
+  dirty = true;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow(), delay);
+}
+async function syncOnce() {
+  if (!syncCfg.gistId) {
+    syncCfg.gistId = (await findGist(syncCfg.token)) || (await createGist(syncCfg.token));
+    persistCfg();
+  }
+  const rem = await readGist(syncCfg.gistId, syncCfg.token);
+  if (rem === 'gone') { syncCfg.gistId = null; persistCfg(); return 'retry'; }
+  let push = true;
+  if (rem) {
+    while (g) await new Promise((r) => setTimeout(r, 250));      // pas pendant un geste du doigt
+    const m = mergeRemote(rem);
+    push = m.push;
+    if (m.changed) {
+      if (m.daysChanged) undoStack = [];
+      save(false); render();
+    }
+  }
+  if (push) {
+    const w = await writeGist(syncCfg.gistId, syncCfg.token);
+    if (w === 'gone') { syncCfg.gistId = null; persistCfg(); return 'retry'; }
+  }
+  return 'ok';
+}
+async function syncNow(manual) {
+  if (!syncCfg) return;
+  if (syncBlocked && !manual) return;
+  if (syncing) { syncAgain = true; return; }
+  syncing = true; syncBlocked = false; dirty = false; clearTimeout(syncTimer);
+  setSync('busy');
+  try {
+    let res = await syncOnce();
+    if (res === 'retry') res = await syncOnce();
+    setSync(res === 'ok' ? 'ok' : 'err', 'Synchronisation impossible');
+  } catch (e) {
+    if (e instanceof SyncErr) { syncBlocked = e.fatal; setSync('err', e.message); }
+    else setSync('err', 'Erreur de synchronisation');
+  } finally {
+    syncing = false;
+    if (syncAgain) { syncAgain = false; scheduleSync(300); }
+  }
+}
+
+$('#syncEnable').onclick = async () => {
+  const token = $('#syncToken').value.trim();
+  if (!/^[A-Za-z0-9_]{20,255}$/.test(token)) { toast('Jeton invalide : collez le jeton complet'); return; }
+  const btn = $('#syncEnable');
+  btn.disabled = true; btn.textContent = 'Connexion…';
+  try {
+    syncCfg = { token, gistId: await findGist(token) };
+    persistCfg(); syncBlocked = false;
+    $('#syncToken').value = '';
+    await syncNow(true);
+    if (syncSt.s !== 'ok') {
+      const msg = syncSt.msg;
+      syncCfg = null; persistCfg(); drawSync(); toast(msg || 'Synchronisation impossible');
+    } else toast('Synchronisation activée');
+  } catch (e) {
+    syncCfg = null; persistCfg(); drawSync();
+    toast(e instanceof SyncErr ? e.message : 'Connexion impossible');
+  } finally { btn.disabled = false; btn.textContent = 'Activer la synchronisation'; }
+};
+$('#syncNow').onclick = () => syncNow(true);
+$('#syncCopy').onclick = async () => {
+  if (!syncCfg) return;
+  try { await navigator.clipboard.writeText(syncCfg.token); toast('Jeton copié : collez-le sur l’autre appareil'); }
+  catch (e) { window.prompt('Copiez ce jeton, puis collez-le sur l’autre appareil :', syncCfg.token); }
+};
+$('#syncOff').onclick = () => {
+  if (!confirm('Arrêter la synchronisation sur cet appareil ? Le planning reste sur cet appareil et sur GitHub.')) return;
+  syncCfg = null; persistCfg(); drawSync(); toast('Synchronisation désactivée');
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) { if (dirty) syncNow(); } else syncNow(); });
+window.addEventListener('online', () => syncNow());
+setInterval(() => { if (!document.hidden) syncNow(); }, 45000);
+
+/* ================= Démarrage ================= */
+render();
+drawSync();
+syncNow();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+})();
+</script>
+</body>
+</html>
