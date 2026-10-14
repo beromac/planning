@@ -131,6 +131,24 @@ header{
 .hint{font-size:12.5px;color:var(--muted);margin:0}
 
 
+/* ---------- Totaux par magasin ---------- */
+.msum{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:7px 4px 1px;font-size:12.5px}
+.msum .sc{display:inline-flex;align-items:center;gap:3px}
+.msum .sc b{font-size:13px}
+.msum .mtot{margin-left:auto;color:var(--muted);font-weight:600;white-space:nowrap}
+.msum .mtot b{color:var(--ink)}
+.ywrap{overflow-x:auto;padding:0 8px 16px;-webkit-overflow-scrolling:touch}
+.ytitle{font-size:13px;font-weight:800;margin:4px 2px 6px}
+.ytab{border-collapse:separate;border-spacing:0;width:100%;min-width:560px;font-size:11.5px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ytab th,.ytab td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--line);font-weight:600}
+.ytab thead th{background:#f3f5f9;color:var(--muted);font-size:10.5px;text-transform:uppercase}
+.ytab th.sn{text-align:left;white-space:nowrap;padding-left:6px;position:sticky;left:0;background:#fff;max-width:110px;overflow:hidden;text-overflow:ellipsis}
+.ytab thead th.sn{background:#f3f5f9}
+.ytab .sn .dotp{margin-right:4px;vertical-align:middle}
+.ytab td.z{color:#b8c0cc;font-weight:400}
+.ytab td.tt,.ytab th.tt{background:#eef4fb;font-weight:800;border-left:1px solid var(--line)}
+.ytab tr.tot td,.ytab tr.tot th{border-bottom:0;background:#f3f5f9;font-weight:800}
+
 /* ---------- Synchronisation ---------- */
 #backup{position:relative}
 #backup[data-s]:not([data-s=off])::after{content:"";position:absolute;top:3px;right:3px;width:11px;height:11px;border-radius:50%;border:2px solid #fff;background:#9aa4b2}
@@ -218,6 +236,19 @@ select,input[type=number],input[type=text],input[type=password]{
   .pl{font-size:13pt;font-weight:800}
   .pc.W .pl{color:#1b6b2a}.pc.CP .pl{color:#a24b00}
   .ppas{display:flex;flex-wrap:wrap;gap:.8mm;align-content:flex-start;margin-top:1mm}
+  .psum{flex:none;display:flex;flex-wrap:wrap;gap:1mm 5mm;margin-top:2mm;font-size:9pt;align-items:center}
+  .psum .dotp{height:4.8mm;min-width:4.8mm;font-size:6.5pt;margin-right:1mm}
+  .psum .ptot{margin-left:auto;font-weight:700}
+  .pp .ytitle{display:none}
+  .pp .ywrap{flex:none;overflow:visible;padding:0;margin-top:2.5mm}
+  .pp .ytab{min-width:0;width:100%;font-size:6.8pt;border:.25mm solid #999;border-radius:0;background:#fff;border-collapse:collapse}
+  .pp .ytab th,.pp .ytab td{border:.2mm solid #bbb;padding:0 .6mm;height:3.7mm;line-height:1}
+  .pp .ytab thead th{background:#e9ecf1;color:#111;font-size:6.3pt}
+  .pp .ytab th.sn{position:static;max-width:none;overflow:visible;background:#fff}
+  .pp .ytab thead th.sn{background:#e9ecf1}
+  .pp .ytab .dotp{height:3.1mm;min-width:3.1mm;font-size:5.3pt;padding:0 .5mm;margin-right:1mm}
+  .pp .ytab td.tt,.pp .ytab th.tt{background:#eef4fb}
+  .pp .ytab tr.tot td,.pp .ytab tr.tot th{background:#e9ecf1}
   .pyear{flex:1;min-height:0;display:grid;gap:3mm;margin-top:2mm}
   .landscape .pyear{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr)}
   .portrait .pyear{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr)}
@@ -261,6 +292,7 @@ select,input[type=number],input[type=text],input[type=password]{
 <section id="monthView">
   <div class="dow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
   <div id="grid"></div>
+  <div id="msum" class="msum" hidden></div>
 </section>
 <section id="yearView" hidden></section>
 
@@ -351,6 +383,7 @@ select,input[type=number],input[type=text],input[type=password]{
     <button class="btn block" id="btnImport">⬆ Restaurer une sauvegarde</button>
     <input type="file" id="fileImport" accept="application/json,.json" hidden>
     <button class="btn block danger" id="btnReset">Tout effacer</button>
+    <p class="note" style="text-align:center;margin-top:14px">Version 3 · totaux par magasin</p>
   </div>
   <div class="dfoot"><button class="btn primary" data-close>Fermer</button></div>
 </dialog>
@@ -439,6 +472,47 @@ function toast(msg) {
   clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
+/* ================= Totaux : jours travaillés par magasin ================= */
+const MON3 = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+// Un "jour travaillé" = un jour W portant la pastille du magasin. tot = jours ayant au moins une pastille.
+function yearCounts(y) {
+  const per = {}, tot = Array(12).fill(0);
+  for (const s of state.stores) per[s.id] = Array(12).fill(0);
+  const pre = y + '-';
+  for (const k of Object.keys(state.days)) {
+    if (!k.startsWith(pre)) continue;
+    const r = state.days[k];
+    if (r.t !== 'W' || !r.s || !r.s.length) continue;
+    const m = parseInt(k.slice(5, 7), 10) - 1;
+    if (!(m >= 0 && m < 12)) continue;
+    let any = false;
+    for (const id of r.s) if (per[id]) { per[id][m]++; any = true; }
+    if (any) tot[m]++;
+  }
+  return { per, tot };
+}
+const sum12 = (a) => a.reduce((x, y) => x + y, 0);
+function renderMonthSum() {
+  const el = $('#msum');
+  if (!state.stores.length) { el.hidden = true; el.innerHTML = ''; return; }
+  const c = yearCounts(ui.y), m = ui.m;
+  el.hidden = false;
+  el.innerHTML = state.stores.map((s) =>
+    `<span class="sc" title="${esc(s.name)}"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span><b>${c.per[s.id][m]}</b></span>`).join('') +
+    `<span class="mtot">Total : <b>${c.tot[m]}</b> j</span>`;
+}
+function yearTable(y) {
+  if (!state.stores.length) return '';
+  const c = yearCounts(y);
+  const head = `<thead><tr><th class="sn">Jours travaillés</th>${MON3.map((n) => `<th>${n}</th>`).join('')}<th class="tt">${y}</th></tr></thead>`;
+  const rows = state.stores.map((s) =>
+    `<tr><th class="sn"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>${esc(s.name)}</th>` +
+    c.per[s.id].map((n) => `<td${n ? '' : ' class="z"'}>${n || '·'}</td>`).join('') +
+    `<td class="tt">${sum12(c.per[s.id])}</td></tr>`).join('');
+  const tot = `<tr class="tot"><th class="sn">Total (jours)</th>${c.tot.map((n) => `<td>${n || '·'}</td>`).join('')}<td class="tt">${sum12(c.tot)}</td></tr>`;
+  return `<div class="ywrap"><div class="ytitle">Jours travaillés par magasin, ${y}</div><table class="ytab">${head}<tbody>${rows}${tot}</tbody></table></div>`;
+}
+
 /* ================= Vue mois ================= */
 const grid = $('#grid'), monthView = $('#monthView'), yearView = $('#yearView'), tools = $('#tools');
 
@@ -462,6 +536,7 @@ function renderMonth() {
   }
   grid.style.gridTemplateRows = `repeat(${rows},1fr)`;
   grid.innerHTML = h;
+  renderMonthSum();
 }
 function updateCell(el) {
   const k = el.dataset.k, rec = state.days[k];
@@ -508,6 +583,7 @@ function applyToCell(el, first) {
   if (rec.t + '|' + rec.s.join(',') !== before) rec.u = Date.now();
   else if (!existed) delete state.days[k];
   updateCell(el);
+  renderMonthSum();
 }
 function endGesture() {
   if (!g) return;
@@ -559,7 +635,7 @@ function legendHTML() {
 function renderYear() {
   let h = '';
   for (let m = 0; m < 12; m++) h += miniMonth(ui.y, m, false);
-  yearView.innerHTML = `<div class="ygrid">${h}</div>${legendHTML()}`;
+  yearView.innerHTML = `<div class="ygrid">${h}</div>${legendHTML()}${yearTable(ui.y)}`;
 }
 yearView.addEventListener('click', (e) => {
   const mi = e.target.closest('.mini');
@@ -723,14 +799,18 @@ function buildPrintMonth(y, m, orient) {
       `<span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>`).join('');
     cells += `<div class="pc${rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}"><div class="ptop"><span class="pn">${d}</span><span class="pl">${rec.t || ''}</span></div><div class="ppas">${dots}</div></div>`;
   }
+  const c = yearCounts(y);
+  const sum = state.stores.length ? `<div class="psum">${state.stores.map((s) =>
+    `<span class="lg"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>${esc(s.name)} : <b>&nbsp;${c.per[s.id][m]} j</b></span>`).join('')}` +
+    `<span class="ptot">Total jours travaillés : ${c.tot[m]}</span></div>` : '';
   return `<div class="pp ${orient}"><div class="phead"><h1>${MONTHS[m]} ${y}</h1>${legendHTML()}</div>` +
     `<div class="pdow">${DOW.map((x) => `<span>${x}</span>`).join('')}</div>` +
-    `<div class="pgrid" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div></div>`;
+    `<div class="pgrid" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div>${sum}</div>`;
 }
 function buildPrintYear(y, orient) {
   let h = '';
   for (let m = 0; m < 12; m++) h += miniMonth(y, m, true);
-  return `<div class="pp ${orient}"><div class="phead"><h1>Année ${y}</h1>${legendHTML()}</div><div class="pyear">${h}</div></div>`;
+  return `<div class="pp ${orient}"><div class="phead"><h1>Année ${y}</h1>${legendHTML()}</div><div class="pyear">${h}</div>${yearTable(y)}</div>`;
 }
 const pType = () => document.querySelector('input[name=pType]:checked').value;
 function syncPrintDlg() { $('#pMonthWrap').hidden = pType() !== 'month'; }
@@ -986,7 +1066,17 @@ render();
 drawSync();
 syncNow();
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  // Quand une nouvelle version de l'application prend le relais, on recharge la page une fois.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch(() => {});
+  });
 }
 })();
 </script>
