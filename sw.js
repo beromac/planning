@@ -1,7 +1,7 @@
 // Service worker : permet à l'application de fonctionner hors connexion.
 // Stratégie "réseau d'abord" : les mises à jour publiées sur GitHub arrivent
 // dès que le téléphone a du réseau, sinon la version en cache est utilisée.
-const CACHE = 'planning-v3';
+const CACHE = 'planning-v4';
 const ASSETS = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {

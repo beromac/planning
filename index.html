@@ -131,6 +131,32 @@ header{
 .hint{font-size:12.5px;color:var(--muted);margin:0}
 
 
+/* ---------- Jours fériés & vacances scolaires ---------- */
+.cell.va:not(.W):not(.CP){background:#dff3fb;border-color:#9fd5ea}
+.cell.fe:not(.W):not(.CP){background:#ebe1ff;border-color:#c3a9f5}
+.cell.fe{box-shadow:inset 4px 0 0 #7a4fd6}
+.cell.va{box-shadow:inset 0 -4px 0 #29a9d8}
+.cell.fe.va{box-shadow:inset 4px 0 0 #7a4fd6,inset 0 -4px 0 #29a9d8}
+.cell.fe .num{color:#5b2fb8;font-weight:800}
+.cell.fe.today .num{color:#fff}
+.hol{flex:none;margin-top:auto;font-size:8px;font-weight:800;color:#5b2fb8;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
+.mc.va:not(.W):not(.CP){background:#d9f1fb}
+.mc.fe:not(.W):not(.CP){background:#e3d6ff}
+.mc.fe{box-shadow:inset 2px 0 0 #7a4fd6}
+.mc.va{box-shadow:inset 0 -2px 0 #29a9d8}
+.mc.fe.va{box-shadow:inset 2px 0 0 #7a4fd6,inset 0 -2px 0 #29a9d8}
+.lfe,.lva{display:inline-flex;min-width:22px;height:18px;border-radius:5px}
+.lfe{background:#ebe1ff;box-shadow:inset 4px 0 0 #7a4fd6}
+.lva{background:#dff3fb;box-shadow:inset 0 -4px 0 #29a9d8}
+.mhol{flex:none;display:flex;flex-direction:column;gap:2px;padding:3px 4px 0;font-size:11px;color:var(--muted);line-height:1.3}
+.mhol b{color:var(--ink);font-weight:700}
+.sq{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;flex:none}
+.sq.fe{background:#7a4fd6}.sq.va{background:#29a9d8}
+.opt .sq{width:14px;height:14px;margin:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.two .btn{width:100%}
+.tail{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+
 /* ---------- Totaux par magasin ---------- */
 .msum{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:7px 4px 1px;font-size:12.5px}
 .msum .sc{display:inline-flex;align-items:center;gap:3px}
@@ -236,6 +262,21 @@ select,input[type=number],input[type=text],input[type=password]{
   .pl{font-size:13pt;font-weight:800}
   .pc.W .pl{color:#1b6b2a}.pc.CP .pl{color:#a24b00}
   .ppas{display:flex;flex-wrap:wrap;gap:.8mm;align-content:flex-start;margin-top:1mm}
+  .pp .lfe,.pp .lva{min-width:6mm;height:4.5mm;border-radius:1mm}
+  .pp .lfe{background:#ebe1ff;box-shadow:inset 1.4mm 0 0 #7a4fd6}
+  .pp .lva{background:#d9f1fb;box-shadow:inset 0 -1.4mm 0 #29a9d8}
+  .pc.va:not(.W):not(.CP){background:#d9f1fb;border-color:#7fc3de}
+  .pc.fe:not(.W):not(.CP){background:#ebe1ff;border-color:#b49af0}
+  .pc.fe{box-shadow:inset 1.4mm 0 0 #7a4fd6}
+  .pc.va{box-shadow:inset 0 -1.4mm 0 #29a9d8}
+  .pc.fe.va{box-shadow:inset 1.4mm 0 0 #7a4fd6,inset 0 -1.4mm 0 #29a9d8}
+  .phol{margin-top:auto;font-size:6.8pt;font-weight:800;color:#5b2fb8;line-height:1.1;padding-bottom:.8mm}
+  .pp .mc.va:not(.W):not(.CP){background:#d9f1fb;border-color:#7fc3de}
+  .pp .mc.fe:not(.W):not(.CP){background:#ebe1ff;border-color:#b49af0}
+  .pp .mc.fe{box-shadow:inset .7mm 0 0 #7a4fd6}
+  .pp .mc.va{box-shadow:inset 0 -.7mm 0 #29a9d8}
+  .pp .mc.fe.va{box-shadow:inset .7mm 0 0 #7a4fd6,inset 0 -.7mm 0 #29a9d8}
+  .pphol{flex:none;margin-top:1.5mm;font-size:8pt;line-height:1.35}
   .psum{flex:none;display:flex;flex-wrap:wrap;gap:1mm 5mm;margin-top:2mm;font-size:9pt;align-items:center}
   .psum .dotp{height:4.8mm;min-width:4.8mm;font-size:6.5pt;margin-right:1mm}
   .psum .ptot{margin-left:auto;font-weight:700}
@@ -285,7 +326,7 @@ select,input[type=number],input[type=text],input[type=password]{
     <span class="sp"></span>
     <button class="ico" id="undo" aria-label="Annuler" title="Annuler">↶</button>
     <button class="ico" id="print" aria-label="Imprimer" title="Imprimer">🖨</button>
-    <button class="ico" id="backup" aria-label="Synchronisation et sauvegarde" title="Synchronisation et sauvegarde" data-s="off">☁</button>
+    <button class="ico" id="backup" aria-label="Paramètres" title="Paramètres" data-s="off">⚙</button>
   </div>
 </header>
 
@@ -293,6 +334,7 @@ select,input[type=number],input[type=text],input[type=password]{
   <div class="dow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
   <div id="grid"></div>
   <div id="msum" class="msum" hidden></div>
+  <div id="mhol" class="mhol" hidden></div>
 </section>
 <section id="yearView" hidden></section>
 
@@ -350,10 +392,16 @@ select,input[type=number],input[type=text],input[type=password]{
   </div>
 </dialog>
 
-<!-- Synchronisation & sauvegarde -->
+<!-- Paramètres -->
 <dialog id="backupDlg">
-  <div class="dhead"><h2>Synchronisation</h2></div>
+  <div class="dhead"><h2>Paramètres</h2></div>
   <div class="dbody">
+    <h3 class="sub">Affichage sur le calendrier</h3>
+    <label class="opt"><input type="checkbox" id="optFe"><i class="sq fe"></i> Jours fériés</label>
+    <label class="opt"><input type="checkbox" id="optVa"><i class="sq va"></i> Vacances scolaires (zone A)</label>
+    <p class="note">Vos jours CP gardent leur couleur orange. Dates officielles de la zone A connues de septembre 2025 à août 2028.</p>
+    <hr class="sep">
+    <h3 class="sub">Synchronisation entre appareils</h3>
     <div id="syncOffBox">
       <p class="note" style="margin-top:0">Reliez votre téléphone et votre ordinateur : ce que vous saisissez sur l'un apparaît automatiquement sur l'autre. Les données sont stockées dans un « gist » privé de votre compte GitHub.</p>
       <details class="how" open>
@@ -372,7 +420,15 @@ select,input[type=number],input[type=text],input[type=password]{
     </div>
     <div id="syncOnBox" hidden>
       <p id="syncStatus" class="sstat">…</p>
+      <p id="tokTail" class="tail"></p>
       <button class="btn block" id="syncNow">↻ Synchroniser maintenant</button>
+      <button class="btn block" id="syncChange">🔑 Modifier le jeton</button>
+      <div id="tokEdit" hidden>
+        <label class="f" for="syncToken2">Nouveau jeton GitHub</label>
+        <input type="password" id="syncToken2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_…">
+        <p class="note">Collez le nouveau jeton (case « gist » uniquement). Avec le même compte GitHub, vous retrouvez le même planning.</p>
+        <div class="two"><button class="btn" id="tokCancel">Annuler</button><button class="btn primary" id="tokSave">Enregistrer</button></div>
+      </div>
       <button class="btn block" id="syncCopy">Copier le jeton (pour l'autre appareil)</button>
       <button class="btn block danger" id="syncOff">Arrêter sur cet appareil</button>
       <p class="note">Les modifications sont envoyées quelques secondes après la saisie, et récupérées à chaque ouverture de l'application. Sans réseau, tout reste enregistré sur l'appareil et part dès le retour de la connexion.</p>
@@ -383,7 +439,7 @@ select,input[type=number],input[type=text],input[type=password]{
     <button class="btn block" id="btnImport">⬆ Restaurer une sauvegarde</button>
     <input type="file" id="fileImport" accept="application/json,.json" hidden>
     <button class="btn block danger" id="btnReset">Tout effacer</button>
-    <p class="note" style="text-align:center;margin-top:14px">Version 3 · totaux par magasin</p>
+    <p class="note" style="text-align:center;margin-top:14px">Version 4 · fériés, vacances zone A, paramètres</p>
   </div>
   <div class="dfoot"><button class="btn primary" data-close>Fermer</button></div>
 </dialog>
@@ -513,6 +569,78 @@ function yearTable(y) {
   return `<div class="ywrap"><div class="ytitle">Jours travaillés par magasin, ${y}</div><table class="ytab">${head}<tbody>${rows}${tot}</tbody></table></div>`;
 }
 
+/* ================= Jours fériés & vacances scolaires (zone A) ================= */
+const PREF_LS = 'planning-prefs-v1';
+const prefs = { fe: true, va: true };
+try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREF_LS)) || {}); } catch (e) {}
+function savePrefs() { try { localStorage.setItem(PREF_LS, JSON.stringify(prefs)); } catch (e) {} }
+
+// Vacances scolaires zone A : [premier jour, dernier jour, nom]. Source : calendrier officiel du ministère
+// (sortie le samedi, reprise le lundi ; le dernier jour est donc le dimanche qui précède la reprise).
+const VAC_A = [
+  ['2025-10-18', '2025-11-02', 'Toussaint'], ['2025-12-20', '2026-01-04', 'Noël'], ['2026-02-07', '2026-02-22', 'Hiver'],
+  ['2026-04-04', '2026-04-19', 'Printemps'], ['2026-07-04', '2026-08-31', 'Été'],
+  ['2026-10-17', '2026-11-01', 'Toussaint'], ['2026-12-19', '2027-01-03', 'Noël'], ['2027-02-13', '2027-02-28', 'Hiver'],
+  ['2027-04-10', '2027-04-25', 'Printemps'], ['2027-07-03', '2027-09-01', 'Été'],
+  ['2027-10-23', '2027-11-07', 'Toussaint'], ['2027-12-18', '2028-01-02', 'Noël'], ['2028-02-19', '2028-03-05', 'Hiver'],
+  ['2028-04-22', '2028-05-08', 'Printemps'], ['2028-07-05', '2028-08-31', 'Été'],
+];
+const VACMAP = {};
+for (const [a, b, n] of VAC_A) {
+  const [ya, ma, da] = a.split('-').map(Number), [yb, mb, db] = b.split('-').map(Number);
+  for (let t = Date.UTC(ya, ma - 1, da), end = Date.UTC(yb, mb - 1, db); t <= end; t += 864e5) {
+    const dt = new Date(t);
+    VACMAP[key(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate())] = n;
+  }
+}
+// Dimanche de Pâques (algorithme grégorien), valable pour toutes les années.
+function easter(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1;
+  return Date.UTC(y, mo - 1, da);
+}
+const feCache = {};
+function feriesOf(y) {   // jours fériés de France métropolitaine : { 'AAAA-MM-JJ': {n: nom, s: nom court} }
+  if (feCache[y]) return feCache[y];
+  const o = {};
+  const put = (t, n, s) => { const d = new Date(t); o[key(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())] = { n, s }; };
+  [[0, 1, "Jour de l'an", 'Nouvel an'], [4, 1, 'Fête du Travail', '1er mai'], [4, 8, 'Victoire 1945', '8 mai'],
+   [6, 14, 'Fête nationale', '14 juillet'], [7, 15, 'Assomption', 'Assomption'], [10, 1, 'Toussaint', 'Toussaint'],
+   [10, 11, 'Armistice 1918', 'Armistice'], [11, 25, 'Noël', 'Noël']].forEach(([m, d, n, s]) => put(Date.UTC(y, m, d), n, s));
+  const e = easter(y);
+  put(e + 864e5, 'Lundi de Pâques', 'Pâques');
+  put(e + 39 * 864e5, 'Ascension', 'Ascension');
+  put(e + 50 * 864e5, 'Lundi de Pentecôte', 'Pentecôte');
+  return (feCache[y] = o);
+}
+const feOf = (k) => (prefs.fe ? feriesOf(+k.slice(0, 4))[k] || null : null);
+const vaOf = (k) => (prefs.va ? VACMAP[k] || null : null);
+const dayCls = (k) => (feOf(k) ? ' fe' : '') + (vaOf(k) ? ' va' : '');
+const dayTitle = (k) => { const f = feOf(k), v = vaOf(k); return [f && f.n, v && 'Vacances scolaires (' + v + ')'].filter(Boolean).join(' · '); };
+const shortDate = (iso) => { const [, m, d] = iso.split('-').map(Number); return (d === 1 ? '1er' : d) + ' ' + MON3[m - 1].toLowerCase(); };
+// Lignes d'information d'un mois : fériés et plages de vacances qui le touchent.
+function monthHolParts(y, m) {
+  const out = [], n = new Date(y, m + 1, 0).getDate();
+  if (prefs.fe) {
+    const l = [];
+    for (let d = 1; d <= n; d++) { const f = feOf(key(y, m, d)); if (f) l.push(`<b>${d}</b> ${esc(f.n)}`); }
+    if (l.length) out.push({ c: 'fe', h: 'Fériés : ' + l.join(' · ') });
+  }
+  if (prefs.va) {
+    const a = key(y, m, 1), z = key(y, m, n);
+    const l = VAC_A.filter(([x, w]) => x <= z && w >= a).map(([x, w, nm]) => `<b>${nm}</b> du ${shortDate(x)} au ${shortDate(w)}`);
+    if (l.length) out.push({ c: 'va', h: 'Vacances (zone A) : ' + l.join(' · ') });
+  }
+  return out;
+}
+function renderMonthHol() {
+  const el = $('#mhol'), p = monthHolParts(ui.y, ui.m);
+  el.hidden = !p.length;
+  el.innerHTML = p.map((x) => `<span><i class="sq ${x.c}"></i>${x.h}</span>`).join('');
+}
+
 /* ================= Vue mois ================= */
 const grid = $('#grid'), monthView = $('#monthView'), yearView = $('#yearView'), tools = $('#tools');
 
@@ -520,7 +648,8 @@ function cellInner(k, d) {
   const rec = state.days[k] || {};
   const pas = storesOf(rec).map((s) =>
     `<span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>`).join('');
-  return `<div class="top"><span class="num">${d}</span><span class="lab">${rec.t || ''}</span></div><div class="pas">${pas}</div>`;
+  const fe = feOf(k);
+  return `<div class="top"><span class="num">${d}</span><span class="lab">${rec.t || ''}</span></div><div class="pas">${pas}</div>${fe ? `<div class="hol">${esc(fe.s)}</div>` : ''}`;
 }
 function renderMonth() {
   const { off, n, rows } = monthInfo(ui.y, ui.m);
@@ -532,11 +661,12 @@ function renderMonth() {
     const k = key(ui.y, ui.m, d);
     const rec = state.days[k];
     const isT = ui.y === t.getFullYear() && ui.m === t.getMonth() && d === t.getDate();
-    h += `<div class="cell${rec && rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}${isT ? ' today' : ''}" data-k="${k}" data-d="${d}">${cellInner(k, d)}</div>`;
+    h += `<div class="cell${rec && rec.t ? ' ' + rec.t : ''}${dayCls(k)}${i % 7 >= 5 ? ' we' : ''}${isT ? ' today' : ''}" data-k="${k}" data-d="${d}" title="${esc(dayTitle(k))}">${cellInner(k, d)}</div>`;
   }
   grid.style.gridTemplateRows = `repeat(${rows},1fr)`;
   grid.innerHTML = h;
   renderMonthSum();
+  renderMonthHol();
 }
 function updateCell(el) {
   const k = el.dataset.k, rec = state.days[k];
@@ -618,10 +748,10 @@ function miniMonth(y, m, print) {
   for (let i = 0; i < rows * 7; i++) {
     const d = i - off + 1;
     if (d < 1 || d > n) { c += '<i></i>'; continue; }
-    const rec = state.days[key(y, m, d)] || {};
+    const kk = key(y, m, d), rec = state.days[kk] || {};
     const dots = storesOf(rec).map((s) =>
       `<span class="dot" style="background:${s.color};color:${ink(s.color)}">${print ? esc(s.ini.slice(0, 2)) : ''}</span>`).join('');
-    c += `<div class="mc${rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}"><span class="mn">${d}</span>${rec.t ? `<span class="ml">${rec.t}</span>` : ''}<span class="md">${dots}</span></div>`;
+    c += `<div class="mc${rec.t ? ' ' + rec.t : ''}${dayCls(kk)}${i % 7 >= 5 ? ' we' : ''}"><span class="mn">${d}</span>${rec.t ? `<span class="ml">${rec.t}</span>` : ''}<span class="md">${dots}</span></div>`;
   }
   return `<div class="mini" data-m="${m}"><div class="mtitle">${MONTHS[m]}</div>` +
     `<div class="mdow">${DOW1.map((x) => `<span>${x}</span>`).join('')}</div>` +
@@ -630,7 +760,10 @@ function miniMonth(y, m, print) {
 function legendHTML() {
   const items = state.stores.map((s) =>
     `<span class="lg"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>${esc(s.name)}</span>`);
-  return `<div class="legend"><span class="lg"><b class="lw">W</b> Disponible</span><span class="lg"><b class="lcp">CP</b> Congés</span>${items.join('')}</div>`;
+  return `<div class="legend"><span class="lg"><b class="lw">W</b> Disponible</span><span class="lg"><b class="lcp">CP</b> Congés</span>` +
+    (prefs.fe ? '<span class="lg"><b class="lfe"></b> Jour férié</span>' : '') +
+    (prefs.va ? '<span class="lg"><b class="lva"></b> Vacances scolaires (zone A)</span>' : '') +
+    `${items.join('')}</div>`;
 }
 function renderYear() {
   let h = '';
@@ -655,7 +788,7 @@ function renderTools() {
       <button class="tool${t === 'W' ? ' on' : ''}" data-tool="W"><b>W</b><small>Dispo</small></button>
       <button class="tool${t === 'CP' ? ' on' : ''}" data-tool="CP"><b>CP</b><small>Congés</small></button>
       <button class="tool${t === 'ERASE' ? ' on' : ''}" data-tool="ERASE"><b>⌫</b><small>Gomme</small></button>
-      <button class="tool" data-stores><b>⚙</b><small>Magasins</small></button>
+      <button class="tool" data-stores><b>🏪</b><small>Magasins</small></button>
     </div>
     <div class="srow">${chips}${add}${hint}</div>`;
 }
@@ -794,18 +927,19 @@ function buildPrintMonth(y, m, orient) {
   for (let i = 0; i < rows * 7; i++) {
     const d = i - off + 1;
     if (d < 1 || d > n) { cells += '<div class="pc blank"></div>'; continue; }
-    const rec = state.days[key(y, m, d)] || {};
+    const kk = key(y, m, d), rec = state.days[kk] || {}, fe = feOf(kk);
     const dots = storesOf(rec).map((s) =>
       `<span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>`).join('');
-    cells += `<div class="pc${rec.t ? ' ' + rec.t : ''}${i % 7 >= 5 ? ' we' : ''}"><div class="ptop"><span class="pn">${d}</span><span class="pl">${rec.t || ''}</span></div><div class="ppas">${dots}</div></div>`;
+    cells += `<div class="pc${rec.t ? ' ' + rec.t : ''}${dayCls(kk)}${i % 7 >= 5 ? ' we' : ''}"><div class="ptop"><span class="pn">${d}</span><span class="pl">${rec.t || ''}</span></div><div class="ppas">${dots}</div>${fe ? `<div class="phol">${esc(fe.n)}</div>` : ''}</div>`;
   }
-  const c = yearCounts(y);
+  const c = yearCounts(y), hol = monthHolParts(y, m);
   const sum = state.stores.length ? `<div class="psum">${state.stores.map((s) =>
     `<span class="lg"><span class="dotp" style="background:${s.color};color:${ink(s.color)}">${esc(s.ini)}</span>${esc(s.name)} : <b>&nbsp;${c.per[s.id][m]} j</b></span>`).join('')}` +
     `<span class="ptot">Total jours travaillés : ${c.tot[m]}</span></div>` : '';
   return `<div class="pp ${orient}"><div class="phead"><h1>${MONTHS[m]} ${y}</h1>${legendHTML()}</div>` +
     `<div class="pdow">${DOW.map((x) => `<span>${x}</span>`).join('')}</div>` +
-    `<div class="pgrid" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div>${sum}</div>`;
+    `<div class="pgrid" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div>${sum}` +
+    (hol.length ? `<div class="pphol">${hol.map((x) => `<div><i class="sq ${x.c}"></i>${x.h}</div>`).join('')}</div>` : '') + `</div>`;
 }
 function buildPrintYear(y, orient) {
   let h = '';
@@ -830,7 +964,13 @@ $('#doPrint').onclick = () => {
 window.addEventListener('afterprint', () => { $('#printArea').innerHTML = ''; });
 
 /* ---------- Sauvegarde / restauration ---------- */
-$('#backup').onclick = () => $('#backupDlg').showModal();
+$('#backup').onclick = () => {
+  $('#optFe').checked = prefs.fe; $('#optVa').checked = prefs.va;
+  closeTokEdit(); drawSync();
+  $('#backupDlg').showModal();
+};
+$('#optFe').onchange = (e) => { prefs.fe = e.target.checked; savePrefs(); lightRender(); };
+$('#optVa').onchange = (e) => { prefs.va = e.target.checked; savePrefs(); lightRender(); };
 $('#btnExport').onclick = () => {
   const t = new Date();
   const blob = new Blob([payload()], { type: 'application/json' });
@@ -975,6 +1115,7 @@ function drawSync() {
   $('#syncOffBox').hidden = !!syncCfg;
   $('#syncOnBox').hidden = !syncCfg;
   if (!syncCfg) return;
+  $('#tokTail').textContent = 'Jeton actuel : ' + syncCfg.token.slice(0, 4) + '…' + syncCfg.token.slice(-4);
   const hh = syncSt.at ? new Date(syncSt.at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
   $('#syncStatus').textContent = syncSt.s === 'busy' ? '⏳ Synchronisation…'
     : syncSt.s === 'ok' ? `✔ Synchronisé à ${hh}`
@@ -1048,6 +1189,29 @@ $('#syncEnable').onclick = async () => {
   } finally { btn.disabled = false; btn.textContent = 'Activer la synchronisation'; }
 };
 $('#syncNow').onclick = () => syncNow(true);
+function closeTokEdit() { $('#tokEdit').hidden = true; $('#syncChange').hidden = false; $('#syncToken2').value = ''; }
+$('#syncChange').onclick = () => { $('#tokEdit').hidden = false; $('#syncChange').hidden = true; $('#syncToken2').focus(); };
+$('#tokCancel').onclick = closeTokEdit;
+$('#tokSave').onclick = async () => {
+  const token = $('#syncToken2').value.trim();
+  if (!/^[A-Za-z0-9_]{20,255}$/.test(token)) { toast('Jeton invalide : collez le jeton complet'); return; }
+  if (syncCfg && token === syncCfg.token) { toast('C’est déjà le jeton utilisé'); return; }
+  const btn = $('#tokSave');
+  btn.disabled = true; btn.textContent = 'Vérification…';
+  const old = syncCfg;
+  try {
+    while (syncing) await new Promise((r) => setTimeout(r, 200));
+    const id = await findGist(token);                 // vérifie le jeton (refusé si invalide ou sans droit « gist »)
+    syncCfg = { token, gistId: id };                  // même compte GitHub : même planning en ligne
+    persistCfg(); syncBlocked = false;
+    await syncNow(true);
+    if (syncSt.s !== 'ok') throw new SyncErr(syncSt.msg || 'Synchronisation impossible');
+    closeTokEdit(); toast('Jeton modifié');
+  } catch (e) {
+    syncCfg = old; persistCfg(); drawSync(); scheduleSync(500);
+    toast(e instanceof SyncErr ? e.message : 'Changement impossible');
+  } finally { btn.disabled = false; btn.textContent = 'Enregistrer'; }
+};
 $('#syncCopy').onclick = async () => {
   if (!syncCfg) return;
   try { await navigator.clipboard.writeText(syncCfg.token); toast('Jeton copié : collez-le sur l’autre appareil'); }
